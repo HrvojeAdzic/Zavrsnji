@@ -505,8 +505,8 @@ void sortiranje(ALBUM* copy) {
 	qsort(copy, brojGlazbe, sizeof(ALBUM), compSng);
 }
 
-int compSng(const void* a, const void* b) {
-	const ALBUM* albumA = (const ALBUM*)a;
-	const ALBUM* albumB = (const ALBUM*)b;
-	return strcmp(albumA->pjesma, albumB->pjesma);
+int compSng(const void* m, const void* n) {
+	const ALBUM* albumM = (const ALBUM*)m;
+	const ALBUM* albumN = (const ALBUM*)n;
+	return strcmp(albumM->pjesma, albumN->pjesma);
 }
