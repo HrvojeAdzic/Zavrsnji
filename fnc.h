@@ -7,19 +7,16 @@ typedef struct {
 }ALBUM;
 
 void izbornik(int);
-void dodajGlazbu();
-void urediGlazbu();
-void ispisGlazbe();
-void pretrazivanjePjesme();
-void pretrazivanjeIzvodaca();
-void pretrazivanjeAlbuma();
-void brisanjeGlazbe();
-void brisanjeDatoteke();
-void izlaz();
+void addMsc();
+void editMsc();
+void prntMsc();
+void srchSng();
+void srchArt();
+void srchAlb();
+void delMsc();
+void delDat();
+void izadji();
 void sortiranje(ALBUM*);
-int comparePjesma(const void* a, const void* b);
+int compSng(const void* m, const void* n);
 
 extern char odgovor;
-
-
-
