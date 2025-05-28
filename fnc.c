@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "funkcije.h"
+#include "fnc.h"
 
 static int brojGlazbe = 0;
 
@@ -12,45 +12,45 @@ void izbornik(int n) {
 
 	switch (n) {
 	case 1:
-		dodajGlazbu();
+		addMsc();
 		break;
 
 	case 2:
-		ispisGlazbe();
+		editMsc();
 		break;
 
 	case 3:
-		urediGlazbu();
+		prntMsc();
 		break;
 
 	case 4:
-		pretrazivanjePjesme();
+		srchSng();
 		break;
 
 	case 5:
-		pretrazivanjeIzvodaca();
+		srchArt();
 		break;
 
 	case 6:
-		pretrazivanjeAlbuma();
+		srchAlb();
 		break;
 
 	case 7:
-		brisanjeGlazbe();
+		delMsc();
 		break;
 
-	case 8:
-		brisanjeDatoteke();
+	case 8: 
+		delDat();
 		break;
 
 	case 9:
-		izlaz();
+		izadji();
 		break;
 
 	}
 }
 
-void dodajGlazbu() {
+void addMsc() {
 	FILE* fp = NULL;
 	ALBUM* temp = NULL;
 
@@ -99,7 +99,7 @@ void dodajGlazbu() {
 	free(temp);
 }
 
-void ispisGlazbe() {
+ void prntMsc() {
 	int i = 0;
 	FILE* fp = NULL;
 	ALBUM* temp;
@@ -112,7 +112,7 @@ void ispisGlazbe() {
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 	if (brojGlazbe == 0) {
-		printf("\nAlbum je prazan.\n\n");
+		printf("\nAlbum je prazan.\n");
 		return;
 	}
 
@@ -147,7 +147,7 @@ void ispisGlazbe() {
 	free(temp);
 }
 
-void urediGlazbu() {
+ void editMsc() {
 	FILE* fp = NULL;
 	ALBUM* temp = NULL;
 	int index = 0;
@@ -218,7 +218,7 @@ void urediGlazbu() {
 	free(temp);
 }
 
-void pretrazivanjePjesme() {
+ void srchSng() {
 	FILE* fp = NULL;
 	ALBUM* temp = NULL;
 	int index = 0;
@@ -272,7 +272,7 @@ void pretrazivanjePjesme() {
 	free(temp);
 }
 
-void pretrazivanjeIzvodaca() {
+ void srchArt() {
 	FILE* fp = NULL;
 	ALBUM* temp = NULL;
 	int index = 0;
@@ -326,7 +326,7 @@ void pretrazivanjeIzvodaca() {
 	free(temp);
 }
 
-void pretrazivanjeAlbuma() {
+ void srchAlb() {
 	FILE* fp = NULL;
 	ALBUM* temp = NULL;
 	int index = 0;
@@ -380,7 +380,7 @@ void pretrazivanjeAlbuma() {
 	free(temp);
 }
 
-void brisanjeGlazbe() {
+void delMsc() {
 	ALBUM* temp = NULL;
 	FILE* fp = NULL;
 	int index = 0;
@@ -443,7 +443,7 @@ void brisanjeGlazbe() {
 	fclose(fp);
 }
 
-void brisanjeDatoteke() {
+void delDat() {
 	odgovor = NULL;
 	int x;
 	char fp[] = "album.bin";
@@ -475,7 +475,8 @@ void brisanjeDatoteke() {
 	}
 }
 
-void izlaz() {
+
+void izadji() {
 	odgovor = NULL;
 	printf("Jeste li sigurni da zelite izaci iz programa (y/n):");
 
@@ -488,7 +489,7 @@ void izlaz() {
 		scanf("%c", &odgovor);
 	}
 
-	if (odgovor == 'Y') {
+	if (odgovor == 'y') {
 		exit(0);
 	}
 	else {
@@ -501,10 +502,10 @@ void sortiranje(ALBUM* copy) {
 		return;
 	}
 
-	qsort(copy, brojGlazbe, sizeof(ALBUM), comparePjesma);
+	qsort(copy, brojGlazbe, sizeof(ALBUM), compSng);
 }
 
-int comparePjesma(const void* a, const void* b) {
+int compSng(const void* a, const void* b) {
 	const ALBUM* albumA = (const ALBUM*)a;
 	const ALBUM* albumB = (const ALBUM*)b;
 	return strcmp(albumA->pjesma, albumB->pjesma);
