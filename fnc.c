@@ -52,20 +52,20 @@ void izbornik(int n) {
 
 void addMsc() {
 	FILE* fp = NULL;
-	ALBUM* temp = NULL;
+	ALBUM* tfp = NULL;
 
-	temp = (ALBUM*)malloc(sizeof(ALBUM));
-	if (temp == NULL) {
+	tfp = (ALBUM*)malloc(sizeof(ALBUM));
+	if (tfp == NULL) {
 		perror("Greska.\n");
 		return 1;
 	}
 
 	printf("Unesite ime izvodaca:");
-	scanf(" %19[^\n]", temp->izvodac);
+	scanf(" %19[^\n]", tfp->izvodac);
 	printf("Unesite ime pjesme:");
-	scanf(" %19[^\n]", temp->pjesma);
+	scanf(" %19[^\n]", tfp->pjesma);
 	printf("Unesite ime albuma:");
-	scanf(" %19[^\n]", temp->album);
+	scanf(" %19[^\n]", tfp->album);
 
 	fp = fopen("album.bin", "rb");
 
@@ -73,7 +73,7 @@ void addMsc() {
 		fp = fopen("album.bin", "wb");
 		brojGlazbe++;
 		fwrite(&brojGlazbe, sizeof(int), 1, fp);
-		fwrite(temp, sizeof(ALBUM), 1, fp);
+		fwrite(tfp, sizeof(ALBUM), 1, fp);
 		fclose(fp);
 	}
 	else {
@@ -90,19 +90,19 @@ void addMsc() {
 			rewind(fp);
 			fwrite(&brojGlazbe, sizeof(int), 1, fp);
 			fseek(fp, 0, SEEK_END);
-			fwrite(temp, sizeof(ALBUM), 1, fp);
+			fwrite(tfp, sizeof(ALBUM), 1, fp);
 			fclose(fp);
 		}
 	}
 
 	fclose(fp);
-	free(temp);
+	free(tfp);
 }
 
  void prntMsc() {
 	int i = 0;
 	FILE* fp = NULL;
-	ALBUM* temp;
+	ALBUM* tfp;
 
 	fp = fopen("album.bin", "rb");
 	if (fp == NULL) {
@@ -117,15 +117,15 @@ void addMsc() {
 	}
 
 
-	temp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
-	if (temp == NULL) {
+	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	if (tfp == NULL) {
 		perror("\nGreska.\n");
 		return 1;
 	}
 
-	fread(temp, sizeof(ALBUM), brojGlazbe, fp);
+	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
 
-	sortiranje(temp);
+	sortiranje(tfp);
 
 	if (brojGlazbe == 1) {
 		printf("Postoji %d. spremljena pjesma.", brojGlazbe);
@@ -136,20 +136,20 @@ void addMsc() {
 
 
 	for (i = 0; i < brojGlazbe; i++) {
-		printf("\n\nPjesma:%s", (temp + i)->pjesma);
-		printf("\nIzvodac:%s", (temp + i)->izvodac);
-		printf("\nAlbum:%s", (temp + i)->album);
+		printf("\n\nPjesma:%s", (tfp + i)->pjesma);
+		printf("\nIzvodac:%s", (tfp + i)->izvodac);
+		printf("\nAlbum:%s", (tfp + i)->album);
 	}
 
 	printf("\n\n");
 
 	fclose(fp);
-	free(temp);
+	free(tfp);
 }
 
  void editMsc() {
 	FILE* fp = NULL;
-	ALBUM* temp = NULL;
+	ALBUM* tfp = NULL;
 	int index = 0;
 	int nadeno = 0;
 	char trazeno[20];
@@ -162,20 +162,20 @@ void addMsc() {
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 
-	temp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
-	if (temp == NULL) {
+	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	if (tfp == NULL) {
 		perror("Greska.\n");
 		return 1;
 	}
 
-	fread(temp, sizeof(ALBUM), brojGlazbe, fp);
+	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
 	fclose(fp);
 
 	printf("Unesi ime pjesme za uredivanje:");
 	scanf(" %19[^\n]", trazeno);
 
 	for (int i = 0; i < brojGlazbe; i++) {
-		if (strcmp((temp + i)->pjesma, trazeno) == 0) {
+		if (strcmp((tfp + i)->pjesma, trazeno) == 0) {
 			index = i;
 			nadeno = 1;
 			break;
@@ -201,13 +201,13 @@ void addMsc() {
 		for (int i = 0; i < brojGlazbe; i++) {
 			if (i == index) {
 				printf("Unesite novo ime izvodaca:");
-				scanf(" %19[^\n]", (temp + i)->izvodac);
+				scanf(" %19[^\n]", (tfp + i)->izvodac);
 				printf("Unesite novo ime pjesme:");
-				scanf(" %19[^\n]", (temp + i)->pjesma);
+				scanf(" %19[^\n]", (tfp + i)->pjesma);
 				printf("Unesite novo ime albuma:");
-				scanf(" %19[^\n]", (temp + i)->album);
+				scanf(" %19[^\n]", (tfp + i)->album);
 
-				fwrite((temp + i), sizeof(ALBUM), 1, fp);
+				fwrite((tfp + i), sizeof(ALBUM), 1, fp);
 				break;
 			}
 			fseek(fp, sizeof(ALBUM), SEEK_CUR);
@@ -215,12 +215,12 @@ void addMsc() {
 	}
 
 	fclose(fp);
-	free(temp);
+	free(tfp);
 }
 
  void srchSng() {
 	FILE* fp = NULL;
-	ALBUM* temp = NULL;
+	ALBUM* tfp = NULL;
 	int index = 0;
 	int nadeno = 0;
 	int br = 0;
@@ -234,8 +234,8 @@ void addMsc() {
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 
-	temp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
-	if (temp == NULL) {
+	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	if (tfp == NULL) {
 		perror("Greska.");
 		return 1;
 	}
@@ -243,10 +243,10 @@ void addMsc() {
 	printf("Unesite ime pjesme:");
 	scanf(" %19[^\n]", trazeno);
 
-	fread(temp, sizeof(ALBUM), brojGlazbe, fp);
+	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
 
 	for (int i = 0; i < brojGlazbe; i++) {
-		if (strcmp((temp + i)->pjesma, trazeno) == 0) {
+		if (strcmp((tfp + i)->pjesma, trazeno) == 0) {
 			br++;
 			if (br == 1) {
 				printf("\nPjesma je 1 put nadena!\n");
@@ -254,9 +254,9 @@ void addMsc() {
 			else {
 				printf("\nPjesma je %d puta nadena!\n", br);
 			}
-			printf("\nPjesma:%s", (temp + i)->pjesma);
-			printf("\nIzvodac:%s", (temp + i)->izvodac);
-			printf("\nAlbum:%s\n", (temp + i)->album);
+			printf("\nPjesma:%s", (tfp + i)->pjesma);
+			printf("\nIzvodac:%s", (tfp + i)->izvodac);
+			printf("\nAlbum:%s\n", (tfp + i)->album);
 
 			nadeno = 1;
 		}
@@ -269,12 +269,12 @@ void addMsc() {
 	}
 
 	fclose(fp);
-	free(temp);
+	free(tfp);
 }
 
  void srchArt() {
 	FILE* fp = NULL;
-	ALBUM* temp = NULL;
+	ALBUM* tfp = NULL;
 	int index = 0;
 	int nadeno = 0;
 	int br = 0;
@@ -288,8 +288,8 @@ void addMsc() {
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 
-	temp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
-	if (temp == NULL) {
+	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	if (tfp == NULL) {
 		perror("Greska.");
 		return 1;
 	}
@@ -297,10 +297,10 @@ void addMsc() {
 	printf("Unesite ime izvodaca:");
 	scanf(" %19[^\n]", trazeno);
 
-	fread(temp, sizeof(ALBUM), brojGlazbe, fp);
+	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
 
 	for (int i = 0; i < brojGlazbe; i++) {
-		if (strcmp((temp + i)->izvodac, trazeno) == 0) {
+		if (strcmp((tfp + i)->izvodac, trazeno) == 0) {
 			br++;
 			if (br == 1) {
 				printf("\nIzvodac je 1 put naden!\n");
@@ -308,9 +308,9 @@ void addMsc() {
 			else {
 				printf("\nIzvodac je %d puta naden!\n", br);
 			}
-			printf("\nIzvodac:%s", (temp + i)->izvodac);
-			printf("\nPjesma:%s", (temp + i)->pjesma);
-			printf("\nAlbum:%s\n", (temp + i)->album);
+			printf("\nIzvodac:%s", (tfp + i)->izvodac);
+			printf("\nPjesma:%s", (tfp + i)->pjesma);
+			printf("\nAlbum:%s\n", (tfp + i)->album);
 
 			nadeno = 1;
 		}
@@ -323,12 +323,12 @@ void addMsc() {
 	}
 
 	fclose(fp);
-	free(temp);
+	free(tfp);
 }
 
  void srchAlb() {
 	FILE* fp = NULL;
-	ALBUM* temp = NULL;
+	ALBUM* tfp = NULL;
 	int index = 0;
 	int nadeno = 0;
 	int br = 0;
@@ -342,8 +342,8 @@ void addMsc() {
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 
-	temp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
-	if (temp == NULL) {
+	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	if (tfp == NULL) {
 		perror("Greska.");
 		return 1;
 	}
@@ -351,10 +351,10 @@ void addMsc() {
 	printf("Unesite ime albuma:");
 	scanf(" %19[^\n]", trazeno);
 
-	fread(temp, sizeof(ALBUM), brojGlazbe, fp);
+	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
 
 	for (int i = 0; i < brojGlazbe; i++) {
-		if (strcmp((temp + i)->album, trazeno) == 0) {
+		if (strcmp((tfp + i)->album, trazeno) == 0) {
 			br++;
 			if (br == 1) {
 				printf("\nAlbum je 1 put naden!\n");
@@ -362,9 +362,9 @@ void addMsc() {
 			else {
 				printf("\n\nAlbum je %d puta naden!\n", br);
 			}
-			printf("\nAlbum:%s", (temp + i)->album);
-			printf("\nPjesma:%s", (temp + i)->pjesma);
-			printf("\nIzvodac:%s", (temp + i)->izvodac);
+			printf("\nAlbum:%s", (tfp + i)->album);
+			printf("\nPjesma:%s", (tfp + i)->pjesma);
+			printf("\nIzvodac:%s", (tfp + i)->izvodac);
 
 			nadeno = 1;
 		}
@@ -377,11 +377,11 @@ void addMsc() {
 	}
 
 	fclose(fp);
-	free(temp);
+	free(tfp);
 }
 
 void delMsc() {
-	ALBUM* temp = NULL;
+	ALBUM* tfp = NULL;
 	FILE* fp = NULL;
 	int index = 0;
 	int nadeno = 0;
@@ -395,19 +395,19 @@ void delMsc() {
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 
-	temp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
-	if (temp == NULL) {
+	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	if (tfp == NULL) {
 		perror("Greska.");
 		return 1;
 	}
 
-	fread(temp, sizeof(ALBUM), brojGlazbe, fp);
+	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
 	fclose(fp);
 	printf("Unesite ime pjesme koju zelite obrisati:");
 	scanf(" %19[^\n]", trazeno);
 
 	for (int i = 0; i < brojGlazbe; i++) {
-		if (strcmp((temp + i)->pjesma, trazeno) == 0) {
+		if (strcmp((tfp + i)->pjesma, trazeno) == 0) {
 			index = i;
 			nadeno = 1;
 			break;
@@ -434,17 +434,17 @@ void delMsc() {
 			continue;
 		}
 		else {
-			fwrite((temp + i), sizeof(ALBUM), 1, fp);
+			fwrite((tfp + i), sizeof(ALBUM), 1, fp);
 		}
 	}
 	printf("\nPjesma je uspjesno obrisana.\n\n");
 
-	free(temp);
+	free(tfp);
 	fclose(fp);
 }
 
 void delDat() {
-	odgovor = NULL;
+	int odgovor = NULL;
 	int x;
 	char fp[] = "album.bin";
 	printf("Jeste li sigurni da zelite obrisati datoteku (y/n):");
@@ -477,7 +477,7 @@ void delDat() {
 
 
 void izadji() {
-	odgovor = NULL;
+	int odgovor = NULL;
 	printf("Jeste li sigurni da zelite izaci iz programa (y/n):");
 
 	while (1) {
