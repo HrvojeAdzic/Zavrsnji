@@ -10,59 +10,24 @@ static int brojGlazbe = 0;
 
 #define SAFE_FREE(p) do { if ((p) != NULL) { free(p); (p) = NULL; } } while(0)
 
-typedef enum {
-	ADD = 1,
-	EDIT,
-	PRINT,
-	SEARCH_SONG,
-	SEARCH_ARTIST,
-	SEARCH_ALBUM,
-	DELETE,
-	DELETE_FILE,
-	EXIT
-} MENU_OPTION;
+
 
 void izbornik(int n) {
-
 	switch (n) {
-	case 1:
-		addMsc();
-		break;
-
-	case 2:
-		editMsc();
-		break;
-
-	case 3:
-		prntMsc();
-		break;
-
-	case 4:
-		srchSng();
-		break;
-
-	case 5:
-		srchArt();
-		break;
-
-	case 6:
-		srchAlb();
-		break;
-
-	case 7:
-		delMsc();
-		break;
-
-	case 8:
-		delDat();
-		break;
-
-	case 9:
-		izadji();
-		break;
-
+	case 1: addMsc(); break;
+	case 2: editMsc(); break;
+	case 3: prntMsc(); break;
+	case 4: srchSng(); break;
+	case 5: srchArt(); break;
+	case 6: srchAlb(); break;
+	case 7: delMsc(); break;
+	case 8: delDat(); break;
+	case 9: izadji(); break;
+	case 10: preimenujDatoteku(); break;
+	default: printf("Nepostojeca opcija!\n"); break;
 	}
 }
+
 
 inline void clearInputBuffer() {
 	int c;
@@ -218,165 +183,178 @@ void editMsc() {
 	free(tfp);
 }
 
-void srchSng() {
-	FILE* fp = NULL;
-	ALBUM* tfp = NULL;
-	int index = 0;
-	int nadeno = 0;
-	int br = 0;
-	char trazeno[20];
+int comparePjesma(const void* a, const void* b) {
+	return strcmp(((ALBUM*)a)->pjesma, ((ALBUM*)b)->pjesma);
+}
 
-	fp = fopen("album.bin", "rb");
+void srchSng() {
+	FILE* fp = fopen("album.bin", "rb");
 	if (fp == NULL) {
 		printf("\nAlbum je prazan.\n\n");
-		return 1;
+		return;
 	}
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 
-	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	ALBUM* tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
 	if (tfp == NULL) {
 		perror("Greska.");
-		return 1;
+		fclose(fp);
+		return;
 	}
-
-	printf("Unesite ime pjesme:");
-	scanf(" %19[^\n]", trazeno);
 
 	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
-
-	for (int i = 0; i < brojGlazbe; i++) {
-		if (strcmp((tfp + i)->pjesma, trazeno) == 0) {
-			br++;
-			if (br == 1) {
-				printf("\nPjesma je 1 put nadena!\n");
-			}
-			else {
-				printf("\nPjesma je %d puta nadena!\n", br);
-			}
-			printf("\nPjesma:%s", (tfp + i)->pjesma);
-			printf("\nIzvodac:%s", (tfp + i)->izvodac);
-			printf("\nAlbum:%s\n", (tfp + i)->album);
-
-			nadeno = 1;
-		}
-	}
-
-	printf("\n");
-
-	if (nadeno == 0) {
-		printf("Pjesma nije nadena.\n\n");
-	}
-
 	fclose(fp);
+
+	char trazeno[20];
+	printf("Unesite ime pjesme: ");
+	scanf(" %19[^\n]", trazeno);
+
+	qsort(tfp, brojGlazbe, sizeof(ALBUM), comparePjesma);
+
+	ALBUM kljuc;
+	strcpy(kljuc.pjesma, trazeno);
+
+	ALBUM* rez = bsearch(&kljuc, tfp, brojGlazbe, sizeof(ALBUM), comparePjesma);
+	if (rez == NULL) {
+		printf("Pjesma nije nadena.\n\n");
+		free(tfp);
+		return;
+	}
+
+	int indeks = rez - tfp;
+
+	while (indeks > 0 && strcmp(tfp[indeks - 1].pjesma, trazeno) == 0) {
+		indeks--;
+	}
+
+	int br = 0;
+	while (indeks < brojGlazbe && strcmp(tfp[indeks].pjesma, trazeno) == 0) {
+		br++;
+		printf("\nPjesma: %s", tfp[indeks].pjesma);
+		printf("\nIzvodac: %s", tfp[indeks].izvodac);
+		printf("\nAlbum: %s\n", tfp[indeks].album);
+		indeks++;
+	}
+
+	printf("\nPjesma je %d puta nadena!\n\n", br);
 	free(tfp);
 }
 
-void srchArt() {
-	FILE* fp = NULL;
-	ALBUM* tfp = NULL;
-	int index = 0;
-	int nadeno = 0;
-	int br = 0;
-	char trazeno[20];
+int compareIzvodac(const void* a, const void* b) {
+	return strcmp(((ALBUM*)a)->izvodac, ((ALBUM*)b)->izvodac);
+}
 
-	fp = fopen("album.bin", "rb");
+
+void srchArt() {
+	FILE* fp = fopen("album.bin", "rb");
 	if (fp == NULL) {
 		printf("\nAlbum je prazan.\n\n");
-		return 1;
+		return;
 	}
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 
-	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	ALBUM* tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
 	if (tfp == NULL) {
 		perror("Greska.");
-		return 1;
+		fclose(fp);
+		return;
 	}
-
-	printf("Unesite ime izvodaca:");
-	scanf(" %19[^\n]", trazeno);
 
 	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
-
-	for (int i = 0; i < brojGlazbe; i++) {
-		if (strcmp((tfp + i)->izvodac, trazeno) == 0) {
-			br++;
-			if (br == 1) {
-				printf("\nIzvodac je 1 put naden!\n");
-			}
-			else {
-				printf("\nIzvodac je %d puta naden!\n", br);
-			}
-			printf("\nIzvodac:%s", (tfp + i)->izvodac);
-			printf("\nPjesma:%s", (tfp + i)->pjesma);
-			printf("\nAlbum:%s\n", (tfp + i)->album);
-
-			nadeno = 1;
-		}
-	}
-
-	printf("\n");
-
-	if (nadeno == 0) {
-		printf("Izvodac nije naden.\n\n");
-	}
-
 	fclose(fp);
+
+	char trazeno[20];
+	printf("Unesite ime izvodaca: ");
+	scanf(" %19[^\n]", trazeno);
+
+	qsort(tfp, brojGlazbe, sizeof(ALBUM), compareIzvodac);
+
+	ALBUM kljuc;
+	strcpy(kljuc.izvodac, trazeno);
+
+	ALBUM* rez = bsearch(&kljuc, tfp, brojGlazbe, sizeof(ALBUM), compareIzvodac);
+	if (rez == NULL) {
+		printf("Izvodac nije naden.\n\n");
+		free(tfp);
+		return;
+	}
+
+	int indeks = rez - tfp;
+
+	while (indeks > 0 && strcmp(tfp[indeks - 1].izvodac, trazeno) == 0) {
+		indeks--;
+	}
+
+	int br = 0;
+	while (indeks < brojGlazbe && strcmp(tfp[indeks].izvodac, trazeno) == 0) {
+		br++;
+		printf("\nIzvodac: %s", tfp[indeks].izvodac);
+		printf("\nPjesma: %s", tfp[indeks].pjesma);
+		printf("\nAlbum: %s\n", tfp[indeks].album);
+		indeks++;
+	}
+
+	printf("\nIzvodac je %d puta naden!\n\n", br);
 	free(tfp);
+}
+
+int compareAlbum(const void* a, const void* b) {
+	return strcmp(((ALBUM*)a)->album, ((ALBUM*)b)->album);
 }
 
 void srchAlb() {
-	FILE* fp = NULL;
-	ALBUM* tfp = NULL;
-	int index = 0;
-	int nadeno = 0;
-	int br = 0;
-	char trazeno[20];
-
-	fp = fopen("album.bin", "rb");
+	FILE* fp = fopen("album.bin", "rb");
 	if (fp == NULL) {
 		printf("\nAlbum je prazan.\n\n");
-		return 1;
+		return;
 	}
 
 	fread(&brojGlazbe, sizeof(int), 1, fp);
 
-	tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+	ALBUM* tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
 	if (tfp == NULL) {
 		perror("Greska.");
-		return 1;
+		fclose(fp);
+		return;
 	}
-
-	printf("Unesite ime albuma:");
-	scanf(" %19[^\n]", trazeno);
 
 	fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
-
-	for (int i = 0; i < brojGlazbe; i++) {
-		if (strcmp((tfp + i)->album, trazeno) == 0) {
-			br++;
-			if (br == 1) {
-				printf("\nAlbum je 1 put naden!\n");
-			}
-			else {
-				printf("\n\nAlbum je %d puta naden!\n", br);
-			}
-			printf("\nAlbum:%s", (tfp + i)->album);
-			printf("\nPjesma:%s", (tfp + i)->pjesma);
-			printf("\nIzvodac:%s", (tfp + i)->izvodac);
-
-			nadeno = 1;
-		}
-	}
-
-	printf("\n\n");
-
-	if (nadeno == 0) {
-		printf("Album nije naden.\n\n");
-	}
-
 	fclose(fp);
+
+	char trazeno[20];
+	printf("Unesite ime albuma: ");
+	scanf(" %19[^\n]", trazeno);
+
+	qsort(tfp, brojGlazbe, sizeof(ALBUM), compareAlbum);
+
+	ALBUM kljuc;
+	strcpy(kljuc.album, trazeno);
+
+	ALBUM* rez = bsearch(&kljuc, tfp, brojGlazbe, sizeof(ALBUM), compareAlbum);
+	if (rez == NULL) {
+		printf("Album nije naden.\n\n");
+		free(tfp);
+		return;
+	}
+
+	int indeks = rez - tfp;
+
+	while (indeks > 0 && strcmp(tfp[indeks - 1].album, trazeno) == 0) {
+		indeks--;
+	}
+
+	int br = 0;
+	while (indeks < brojGlazbe && strcmp(tfp[indeks].album, trazeno) == 0) {
+		br++;
+		printf("\nAlbum: %s", tfp[indeks].album);
+		printf("\nPjesma: %s", tfp[indeks].pjesma);
+		printf("\nIzvodac: %s\n", tfp[indeks].izvodac);
+		indeks++;
+	}
+
+	printf("\nAlbum je %d puta naden!\n\n", br);
 	free(tfp);
 }
 
@@ -507,4 +485,19 @@ int compSng(const void* m, const void* n) {
 	const ALBUM* albumM = (const ALBUM*)m;
 	const ALBUM* albumN = (const ALBUM*)n;
 	return strcmp(albumM->pjesma, albumN->pjesma);
+}
+
+void preimenujDatoteku() {
+	char staroIme[100], novoIme[100];
+	printf("Unesite trenutno ime datoteke: ");
+	scanf(" %99[^\n]", staroIme);
+	printf("Unesite novo ime datoteke: ");
+	scanf(" %99[^\n]", novoIme);
+
+	if (rename(staroIme, novoIme) == 0) {
+		printf("Datoteka je uspjesno preimenovana.\n");
+	}
+	else {
+		perror("Greska pri preimenovanju datoteke");
+	}
 }
