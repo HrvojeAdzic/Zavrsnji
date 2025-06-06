@@ -21,13 +21,14 @@ int main() {
 		printf("[| 7. Izbrisi glazbu.             |]\n");
 		printf("[| 8. Izbrisi datoteku.           |]\n");
 		printf("[| 9. Spremi i izadi.             |]\n");
+		printf("[| 10. Preimenuj datoteku.        |]\n");
 		printf("====================================\n");
 
 		do {
 			printf("\nSTO ZELITE NAPRAVITI?\n");
 			scanf("%d", &n);
 			getchar();
-		} while (!(n > 0 && n < 10));
+		} while (!(n > 0 && n < 11));
 
 		izbornik(n);
 
