@@ -8,6 +8,20 @@
 
 static int brojGlazbe = 0;
 
+#define SAFE_FREE(p) do { if ((p) != NULL) { free(p); (p) = NULL; } } while(0)
+
+typedef enum {
+	ADD = 1,
+	EDIT,
+	PRINT,
+	SEARCH_SONG,
+	SEARCH_ARTIST,
+	SEARCH_ALBUM,
+	DELETE,
+	DELETE_FILE,
+	EXIT
+} MENU_OPTION;
+
 void izbornik(int n) {
 
 	switch (n) {
@@ -39,7 +53,7 @@ void izbornik(int n) {
 		delMsc();
 		break;
 
-	case 8: 
+	case 8:
 		delDat();
 		break;
 
@@ -50,14 +64,18 @@ void izbornik(int n) {
 	}
 }
 
+inline void clearInputBuffer() {
+	int c;
+	while ((c = getchar()) != '\n' && c != EOF);
+}
+
+
 void addMsc() {
 	FILE* fp = NULL;
-	ALBUM* tfp = NULL;
-
-	tfp = (ALBUM*)malloc(sizeof(ALBUM));
-	if (tfp == NULL) {
-		perror("Greska.\n");
-		return 1;
+	ALBUM* tfp = (ALBUM*)malloc(sizeof(ALBUM));
+	if (!tfp) {
+		perror("Greska.");
+		return;
 	}
 
 	printf("Unesite ime izvodaca:");
@@ -67,24 +85,21 @@ void addMsc() {
 	printf("Unesite ime albuma:");
 	scanf(" %19[^\n]", tfp->album);
 
+	fp = fopen("album.txt", "a");
+	if (!fp) {
+		perror("Greska pri otvaranju datoteke.");
+		SAFE_FREE(tfp);
+		return;
+	}
 
-    fp = fopen("album.txt", "a");
-    if (fp == NULL) {
-        perror("Greska pri otvaranju datoteke.\n");
-        free(tfp);
-        return;
-    }
+	fprintf(fp, "Izvodac: %s\nPjesma: %s\nAlbum: %s\n\n", tfp->izvodac, tfp->pjesma, tfp->album);
 
-    // Zapisivanje podataka u tekstualnu datoteku
-    fprintf(fp, "Izvodac: %s\nPjesma: %s\nAlbum: %s\n\n", tfp->izvodac, tfp->pjesma, tfp->album);
-
-    fclose(fp);
-    free(tfp);
-    printf("Pjesma uspjesno dodana!\n");
-}
+	fclose(fp);
+	SAFE_FREE(tfp);
+	printf("Pjesma uspjesno dodana!\n");
 }
 
- void prntMsc() {
+void prntMsc() {
 	int i = 0;
 	FILE* fp = NULL;
 	ALBUM* tfp;
@@ -132,7 +147,7 @@ void addMsc() {
 	free(tfp);
 }
 
- void editMsc() {
+void editMsc() {
 	FILE* fp = NULL;
 	ALBUM* tfp = NULL;
 	int index = 0;
@@ -203,7 +218,7 @@ void addMsc() {
 	free(tfp);
 }
 
- void srchSng() {
+void srchSng() {
 	FILE* fp = NULL;
 	ALBUM* tfp = NULL;
 	int index = 0;
@@ -257,7 +272,7 @@ void addMsc() {
 	free(tfp);
 }
 
- void srchArt() {
+void srchArt() {
 	FILE* fp = NULL;
 	ALBUM* tfp = NULL;
 	int index = 0;
@@ -311,7 +326,7 @@ void addMsc() {
 	free(tfp);
 }
 
- void srchAlb() {
+void srchAlb() {
 	FILE* fp = NULL;
 	ALBUM* tfp = NULL;
 	int index = 0;
@@ -483,9 +498,7 @@ void izadji() {
 }
 
 void sortiranje(ALBUM* copy) {
-	if (copy == NULL) {
-		return;
-	}
+	if (!copy) return;
 
 	qsort(copy, brojGlazbe, sizeof(ALBUM), compSng);
 }
