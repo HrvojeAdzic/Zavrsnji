@@ -67,36 +67,21 @@ void addMsc() {
 	printf("Unesite ime albuma:");
 	scanf(" %19[^\n]", tfp->album);
 
-	fp = fopen("album.bin", "rb");
 
-	if (fp == NULL) {
-		fp = fopen("album.bin", "wb");
-		brojGlazbe++;
-		fwrite(&brojGlazbe, sizeof(int), 1, fp);
-		fwrite(tfp, sizeof(ALBUM), 1, fp);
-		fclose(fp);
-	}
-	else {
-		fclose(fp);
-		fp = fopen("album.bin", "rb+");
-		if (fp == NULL) {
-			perror("Greska.\n");
-			return;
-		}
-		else {
-			rewind(fp);
-			fread(&brojGlazbe, sizeof(int), 1, fp);
-			brojGlazbe++;
-			rewind(fp);
-			fwrite(&brojGlazbe, sizeof(int), 1, fp);
-			fseek(fp, 0, SEEK_END);
-			fwrite(tfp, sizeof(ALBUM), 1, fp);
-			fclose(fp);
-		}
-	}
+    fp = fopen("album.txt", "a");
+    if (fp == NULL) {
+        perror("Greska pri otvaranju datoteke.\n");
+        free(tfp);
+        return;
+    }
 
-	fclose(fp);
-	free(tfp);
+    // Zapisivanje podataka u tekstualnu datoteku
+    fprintf(fp, "Izvodac: %s\nPjesma: %s\nAlbum: %s\n\n", tfp->izvodac, tfp->pjesma, tfp->album);
+
+    fclose(fp);
+    free(tfp);
+    printf("Pjesma uspjesno dodana!\n");
+}
 }
 
  void prntMsc() {
