@@ -7,7 +7,7 @@
 
 static int brojGlazbe = 0;
 
-#define SAFE_FREE(p) do { if ((p) != NULL) { free(p); (p) = NULL; } } while(0)
+#define SAFE_FREE(p) do { if ((p) != NULL) { free(p); (p) = NULL; } } while(0) //oslobađanje mem preko p pointera
 
 void izbornik(int n) {
     switch (n) {
@@ -25,28 +25,28 @@ void izbornik(int n) {
     }
 }
 
-inline void clearInputBuffer() {
+inline void clearInputBuffer() { //pomoćna funkcija koja čisti ulazni buffer nakon unosa
     int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n' && c != EOF); //čisti sve suvišno što je uneseno s getchar
 }
 
-void addMsc() {
-    FILE* fp = fopen("album.bin", "rb+");
+void addMsc() { // 1 
+    FILE* fp = fopen("album.bin", "rb+"); //pisanje i čitanje u binarnom
     ALBUM nova;
 
-    if (!fp) {
+    if (!fp) { //provjerava da li dat postoji ili ima problema
         fp = fopen("album.bin", "wb");
         if (!fp) {
             perror("Greska pri stvaranju datoteke");
             return;
         }
         int zero = 0;
-        fwrite(&zero, sizeof(int), 1, fp);
+        fwrite(&zero, sizeof(int), 1, fp); // piše na početak datoteke brojač zapisa (fwrite(const void *ptr, size_t size, size_t count, FILE *stream);)
         fclose(fp);
         fp = fopen("album.bin", "rb+");
     }
 
-    fread(&brojGlazbe, sizeof(int), 1, fp);
+    fread(&brojGlazbe, sizeof(int), 1, fp); // isto ko i fwrite sam za čitanje brojGlazbe
 
     printf("Unesite ime izvodaca: ");
     scanf(" %19[^\n]", nova.izvodac);
@@ -56,16 +56,16 @@ void addMsc() {
     scanf(" %19[^\n]", nova.album);
 
     brojGlazbe++;
-    rewind(fp);
+    rewind(fp); //vraća pointer datoteke na 0
     fwrite(&brojGlazbe, sizeof(int), 1, fp);
-    fseek(fp, 0, SEEK_END);
-    fwrite(&nova, sizeof(ALBUM), 1, fp);
+    fseek(fp, 0, SEEK_END); // postavlja pointer na 0 kako i mogli nove pjesme dodavati
+    fwrite(&nova, sizeof(ALBUM), 1, fp); // zapisuje pjesmu na kraj datoteke
 
     fclose(fp);
     printf("Pjesma dodana!\n");
 }
 
-void prntMsc() {
+void prntMsc() { // 2
     int i;
     FILE* fp = fopen("album.bin", "rb");
     if (!fp) {
@@ -73,21 +73,21 @@ void prntMsc() {
         return;
     }
 
-    fread(&brojGlazbe, sizeof(int), 1, fp);
+    fread(&brojGlazbe, sizeof(int), 1, fp); // čita prva 4 bajta i stavlja ih u brojGlazbe
     if (brojGlazbe == 0) {
         printf("\nAlbum je prazan.\n");
         fclose(fp);
         return;
     }
 
-    ALBUM* tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+    ALBUM* tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM)); // dinamički alocira prostor u memoriji za sve pjesme
     if (!tfp) {
         perror("\nGreska.\n");
         fclose(fp);
         return;
     }
 
-    fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
+    fread(tfp, sizeof(ALBUM), brojGlazbe, fp); 
     fclose(fp);
 
     sortiranje(tfp);
@@ -126,7 +126,7 @@ void editMsc() {
 
     int nadeno = 0, index = 0;
     for (int i = 0; i < brojGlazbe; i++) {
-        if (strcmp(tfp[i].pjesma, trazeno) == 0) {
+        if (strcmp(tfp[i].pjesma, trazeno) == 0) { // uspoređivanje se radi preko imena
             nadeno = 1;
             index = i;
             break;
@@ -146,8 +146,10 @@ void editMsc() {
         return;
     }
 
-    fseek(fp, sizeof(int) + index * sizeof(ALBUM), SEEK_SET);
+    fseek(fp, sizeof(int) + index * sizeof(ALBUM), SEEK_SET); // Pomiče se na mjesto gdje je željeni indeks pjesme u binarnoj datoteci
 
+     // SEEK_SET jer trebamo od početka datoteke
+    
     printf("Unesite novo ime izvodaca: ");
     scanf(" %19[^\n]", tfp[index].izvodac);
     printf("Unesite novo ime pjesme: ");
@@ -155,7 +157,7 @@ void editMsc() {
     printf("Unesite novo ime albuma: ");
     scanf(" %19[^\n]", tfp[index].album);
 
-    fwrite(&tfp[index], sizeof(ALBUM), 1, fp);
+    fwrite(&tfp[index], sizeof(ALBUM), 1, fp); // upisuje nove vrijednosti u datoteku
     fclose(fp);
     free(tfp);
 }
