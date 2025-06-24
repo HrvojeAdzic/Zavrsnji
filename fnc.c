@@ -73,7 +73,7 @@ void prntMsc() { // 2
         return;
     }
 
-    fread(&brojGlazbe, sizeof(int), 1, fp); // čita prva 4 bajta i stavlja ih u brojGlazbe
+    fread(&brojGlazbe, sizeof(int), 1, fp); // čita prva 4 bajta i stavlja ih u brojGlazbe 
     if (brojGlazbe == 0) {
         printf("\nAlbum je prazan.\n");
         fclose(fp);
@@ -87,7 +87,7 @@ void prntMsc() { // 2
         return;
     }
 
-    fread(tfp, sizeof(ALBUM), brojGlazbe, fp); 
+    fread(tfp, sizeof(ALBUM), brojGlazbe, fp);  // čita sve pjesme u memoriji
     fclose(fp);
 
     sortiranje(tfp);
@@ -102,14 +102,14 @@ void prntMsc() { // 2
     free(tfp);
 }
 
-void editMsc() {
+void editMsc() { // 3
     FILE* fp = fopen("album.bin", "rb");
     if (!fp) {
         printf("\nAlbum je prazan.\n\n");
         return;
     }
 
-    fread(&brojGlazbe, sizeof(int), 1, fp);
+    fread(&brojGlazbe, sizeof(int), 1, fp); // čita int koji označava koliko je pjesama spremljeno (brojGlazbe)
     ALBUM* tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
     if (!tfp) {
         perror("Greska.");
@@ -117,18 +117,18 @@ void editMsc() {
         return;
     }
 
-    fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
+    fread(tfp, sizeof(ALBUM), brojGlazbe, fp); // Čitanje svih pjesama u memoriju
     fclose(fp);
 
     char trazeno[20];
-    printf("Unesi ime pjesme za uredivanje: ");
+    printf("Unesi ime pjesme za uredivanje: "); // dohvaćanje pjesme za uređivanje
     scanf(" %19[^\n]", trazeno);
 
     int nadeno = 0, index = 0;
     for (int i = 0; i < brojGlazbe; i++) {
         if (strcmp(tfp[i].pjesma, trazeno) == 0) { // uspoređivanje se radi preko imena
             nadeno = 1;
-            index = i;
+            index = i; // ako je pronađena pamti index i postavlja nađeno na 1
             break;
         }
     }
@@ -148,8 +148,10 @@ void editMsc() {
 
     fseek(fp, sizeof(int) + index * sizeof(ALBUM), SEEK_SET); // Pomiče se na mjesto gdje je željeni indeks pjesme u binarnoj datoteci
 
-     // SEEK_SET jer trebamo od početka datoteke
-    
+    // SEEK_SET jer trebamo od početka datoteke
+    //sizeof(int) → preskoči zaglavlje (broj pjesama).
+    //index * sizeof(ALBUM) → dođi do pravog zapisa.
+
     printf("Unesite novo ime izvodaca: ");
     scanf(" %19[^\n]", tfp[index].izvodac);
     printf("Unesite novo ime pjesme: ");
@@ -157,14 +159,19 @@ void editMsc() {
     printf("Unesite novo ime albuma: ");
     scanf(" %19[^\n]", tfp[index].album);
 
-    fwrite(&tfp[index], sizeof(ALBUM), 1, fp); // upisuje nove vrijednosti u datoteku
+    fwrite(&tfp[index], sizeof(ALBUM), 1, fp); // upisuje nove vrijednosti u datoteku i izbriše stare
     fclose(fp);
     free(tfp);
 }
 
-int compSng(const void* a, const void* b) {
+int compSng(const void* a, const void* b) { // za svako uspoređivanje se koristi abeceda (ASCII) pa se automatski sortira preko tfp
     return strcmp(((ALBUM*)a)->pjesma, ((ALBUM*)b)->pjesma);
 }
+// Negativan broj ako a->pjesma < b->pjesma
+// Nulu ako su jednaki
+// Pozitivan broj ako a->pjesma > b->pjesma
+
+
 int compareIzvodac(const void* a, const void* b) {
     return strcmp(((ALBUM*)a)->izvodac, ((ALBUM*)b)->izvodac);
 }
@@ -172,7 +179,7 @@ int compareAlbum(const void* a, const void* b) {
     return strcmp(((ALBUM*)a)->album, ((ALBUM*)b)->album);
 }
 
-void sortiranje(ALBUM* copy) {
+void sortiranje(ALBUM* copy) { // Sortira niz struktura tipa ALBUM po nazivu pjesme (pjesma) abecedno
     if (!copy) return;
     qsort(copy, brojGlazbe, sizeof(ALBUM), compSng);
 }
@@ -184,7 +191,7 @@ void srchSng() {
         return;
     }
 
-    fread(&brojGlazbe, sizeof(int), 1, fp);
+    fread(&brojGlazbe, sizeof(int), 1, fp); // čita koliko pjesma postoji
     ALBUM* tfp = malloc(brojGlazbe * sizeof(ALBUM));
     if (!tfp) {
         perror("Greska.");
@@ -192,7 +199,7 @@ void srchSng() {
         return;
     }
 
-    fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
+    fread(tfp, sizeof(ALBUM), brojGlazbe, fp); // učitava sve pjesme
     fclose(fp);
 
     char trazeno[20];
@@ -200,10 +207,18 @@ void srchSng() {
     scanf(" %19[^\n]", trazeno);
 
     qsort(tfp, brojGlazbe, sizeof(ALBUM), compSng);
+    // tfp -> pokazivač na prvi element niza
+    // brojGlazbe -> broj elemenata u nizu
+    // sizeof(ALBUM) -> veličina svakog elementa
 
-    ALBUM kljuc;
+    ALBUM kljuc; // privremeni pointer umjesto tfp
     strcpy(kljuc.pjesma, trazeno);
-    ALBUM* rez = bsearch(&kljuc, tfp, brojGlazbe, sizeof(ALBUM), compSng);
+    ALBUM* rez = bsearch(&kljuc, tfp, brojGlazbe, sizeof(ALBUM), compSng); // Ako nije pronađena: rez == NULL.
+    //key	Pokazivač na element koji tražimo (&kljuc)
+    //base	Pokazivač na prvi element sortiranog niza (tfp)
+    //nitems	Broj elemenata u nizu (brojGlazbe)
+    //size	Veličina jednog elementa niza (veličina ALBUM)
+    //compar	Funkcija za usporedbu dvaju elemenata (compSng)
 
     if (!rez) {
         printf("Pjesma nije nadena.\n");
@@ -228,7 +243,7 @@ void srchSng() {
 
 void srchArt() {
     FILE* fp = NULL;
-    ALBUM* temp = NULL;
+    ALBUM* tfp = NULL;
     int index = 0;
     int nadeno = 0;
     int br = 0;
@@ -237,24 +252,26 @@ void srchArt() {
     fp = fopen("album.bin", "rb");
     if (fp == NULL) {
         printf("\nAlbum je prazan.\n\n");
-        return 1;
+        return;
     }
 
     fread(&brojGlazbe, sizeof(int), 1, fp);
 
-    temp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
-    if (temp == NULL) {
+    tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+    if (tfp == NULL) {
         perror("Greska.");
-        return 1;
+        return;
     }
 
     printf("Unesite ime izvodaca:");
     scanf(" %19[^\n]", trazeno);
 
-    fread(temp, sizeof(ALBUM), brojGlazbe, fp);
+    fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
 
+    qsort(tfp, brojGlazbe, sizeof(ALBUM), compareIzvodac); // sortiranje po izvođaču
+    
     for (int i = 0; i < brojGlazbe; i++) {
-        if (strcmp((temp + i)->izvodac, trazeno) == 0) {
+        if (strcmp((tfp + i)->izvodac, trazeno) == 0) { // Ako je izvođač u strukturi isti kao uneseni string, ispiši podatke.
             br++;
             if (br == 1) {
                 printf("\nIzvodac je 1 put naden!\n");
@@ -262,9 +279,9 @@ void srchArt() {
             else {
                 printf("\nIzvodac je %d puta naden!\n", br);
             }
-            printf("\nIzvodac:%s", (temp + i)->izvodac);
-            printf("\nPjesma:%s", (temp + i)->pjesma);
-            printf("\nAlbum:%s\n", (temp + i)->album);
+            printf("\nIzvodac:%s", (tfp + i)->izvodac);
+            printf("\nPjesma:%s", (tfp + i)->pjesma);
+            printf("\nAlbum:%s\n", (tfp + i)->album);
 
             nadeno = 1;
         }
@@ -277,7 +294,7 @@ void srchArt() {
     }
 
     fclose(fp);
-    free(temp);
+    free(tfp);
 }
 
 
@@ -292,7 +309,7 @@ void srchAlb() {
     fp = fopen("album.bin", "rb");
     if (fp == NULL) {
         printf("\nAlbum je prazan.\n\n");
-        return 1;
+        return;
     }
 
     fread(&brojGlazbe, sizeof(int), 1, fp);
@@ -300,13 +317,15 @@ void srchAlb() {
     tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
     if (tfp == NULL) {
         perror("Greska.");
-        return 1;
+        return;
     }
 
     printf("Unesite ime albuma:");
     scanf(" %19[^\n]", trazeno);
 
     fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
+
+    qsort(tfp, brojGlazbe, sizeof(ALBUM), compareAlbum); // sortiranje po albumu
 
     for (int i = 0; i < brojGlazbe; i++) {
         if (strcmp((tfp + i)->album, trazeno) == 0) {
@@ -339,21 +358,21 @@ void delMsc() {
     ALBUM* tfp = NULL;
     FILE* fp = NULL;
     int index = 0;
-    int nadeno = 0;
+    int nadeno = 0; // Vrijednost 0 znači "nije pronađeno", 1 znači "pronađeno"
     char trazeno[20];
 
     fp = fopen("album.bin", "rb");
     if (fp == NULL) {
         printf("\nAlbum je prazan.\n\n");
-        return 1;
+        return;
     }
 
-    fread(&brojGlazbe, sizeof(int), 1, fp);
+    fread(&brojGlazbe, sizeof(int), 1, fp); // Čitanje broja pjesama/albuma (brojGlazbe) iz datoteke.
 
-    tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM));
+    tfp = (ALBUM*)malloc(brojGlazbe * sizeof(ALBUM)); // Ovo je niz koji će pohraniti sve albume koje ćemo učitati iz datoteke
     if (tfp == NULL) {
         perror("Greska.");
-        return 1;
+        return;
     }
 
     fread(tfp, sizeof(ALBUM), brojGlazbe, fp);
@@ -362,8 +381,8 @@ void delMsc() {
     scanf(" %19[^\n]", trazeno);
 
     for (int i = 0; i < brojGlazbe; i++) {
-        if (strcmp((tfp + i)->pjesma, trazeno) == 0) {
-            index = i;
+        if (strcmp((tfp + i)->pjesma, trazeno) == 0) { // uspoređivanje unesenog stringa i postojećih pjesma u datoteci
+            index = i; // index se postavlja na postojeći index i
             nadeno = 1;
             break;
         }
@@ -379,12 +398,12 @@ void delMsc() {
     fp = fopen("album.bin", "wb");
     if (fp == NULL) {
         perror("Greska.");
-        return 1;
+        return;
     }
 
-    brojGlazbe--;
-    fwrite(&brojGlazbe, sizeof(int), 1, fp);
-    for (int i = 0; i < brojGlazbe + 1; i++) {
+    brojGlazbe--; // smanjujemo za 1 jer brišemo glazbu
+    fwrite(&brojGlazbe, sizeof(int), 1, fp); // Upisuje novi broj pjesama u datoteku.
+    for (int i = 0; i < brojGlazbe + 1; i++) { // Ako je indeks trenutnog elementa onaj koji želimo obrisati (index), preskače ga (continue). Za ostale elemente piše ih natrag u datoteku (osim obrisanog).
         if (i == index) {
             continue;
         }
